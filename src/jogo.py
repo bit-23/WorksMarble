@@ -12,7 +12,7 @@ from pathlib import Path
 
 import pygame
 
-from cenario import Cenario, TILE
+from cenario import Cenario, TEMAS, TILE
 from jogador import Jogador, VELOCIDADE
 
 # ----------------------------------------------------------------------
@@ -160,8 +160,9 @@ class Jogo:
         rng = random.Random(self.semente)  # mesma semente => mesmo labirinto
         colunas, linhas = self._tamanho_nivel()
         grade, entrada, saida, dist = gerar_labirinto(colunas, linhas, rng)
+        tema = rng.choice(list(TEMAS))  # mapa sorteado a cada fase (masmorra, gelo...)
 
-        self.cenario = Cenario(grade, entrada, saida)
+        self.cenario = Cenario(grade, entrada, saida, tema=tema)
         cx, cy = self.cenario.centro_tile(entrada)
         self.jogador = Jogador(cx, cy + 12)
 
@@ -299,7 +300,7 @@ class Jogo:
             self._desenhar_menu()
             return
 
-        self.tela.fill((18, 16, 28))
+        self.tela.fill(self.cenario.tema["fundo"])
         cx, cy = self.camera
         self.cenario.desenhar(self.tela, cx, cy)
         self.jogador.desenhar(self.tela, (cx, cy))
@@ -312,6 +313,7 @@ class Jogo:
             self.tela.blit(self._veu, (0, 0))
             self.cenario.desenhar_brilho_saida(self.tela, cx, cy)
 
+        self.cenario.desenhar_clima(self.tela, cx, cy)
         self._desenhar_hud()
 
         if self.estado == "pausado":
